@@ -217,5 +217,22 @@ TEST(FcParserUtilsTest, DuplicateKeysInObject) {
                 }
               }])json")));
 }
+TEST(FcParserUtilsTest, ToolNameWithDotsAndDashes) {
+  EXPECT_THAT(ParseFcExpression(R"(call:tool.name-123{})"),
+              IsOkAndHolds(nlohmann::ordered_json::parse(R"json([{
+                "name": "tool.name-123",
+                "arguments": {}
+              }])json")));
+}
+
+TEST(FcParserUtilsTest, ParameterNameWithDotsAndDashes) {
+  EXPECT_THAT(ParseFcExpression(R"(call:tool_name{param.name-123:1})"),
+              IsOkAndHolds(nlohmann::ordered_json::parse(R"json([{
+                "name": "tool_name",
+                "arguments": {
+                  "param.name-123": 1
+                }
+              }])json")));
+}
 
 }  // namespace

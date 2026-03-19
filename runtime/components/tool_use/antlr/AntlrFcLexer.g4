@@ -23,7 +23,10 @@ fragment EXP : [eE] [+-]? [0-9]+;
 ESCAPED_STRING : ESCAPE .*? ESCAPE ;
 
 CALL : 'call';
-ID : [a-zA-Z_] [a-zA-Z_0-9]*;
+
+// An identifier must start with a letter or an underscore.
+// The remaining characters may be letters, numbers, underscores, dots, or dashes.
+ID : [a-zA-Z_] [a-zA-Z0-9_.-]*;
 
 // Whitespace: Skipped
 WS : [ \t\n\r]+ -> skip;

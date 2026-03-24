@@ -53,3 +53,29 @@ jobs:
         run: |
           WHEEL_PATH=$(find bazel-bin/python/litert_lm -name "*.whl" | head -n 1)
           uv publish $WHEEL_PATH
+
+      # We just need to build the CLI once and it can works on all Python
+      # versions and different OSs. We pick Linux 3.13.
+      - name: Build CLI Python Wheel
+        if: matrix.python-version == '3.13'
+        run: |
+          DATE=$(date +'%Y%m%d')
+          bazel build \
+            --define=PYPI_NIGHTLY=1 \
+            --define=PYPI_NIGHTLY_DATE=${DATE} \
+            -c opt //python/litert_lm_cli:litert_lm_cli_wheel
+
+      - name: Test CLI Python Wheel
+        if: matrix.python-version == '3.13'
+        run: |
+          WHEEL_PATH=$(find bazel-bin/python/litert_lm_cli -name "*.whl" | head -n 1)
+          uv pip install $WHEEL_PATH
+          uv run litert-lm --help
+
+      - name: Publish CLI to PyPI
+        if: matrix.python-version == '3.13'
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_UPLOAD_TOKEN }}
+        run: |
+          WHEEL_PATH=$(find bazel-bin/python/litert_lm_cli -name "*.whl" | head -n 1)
+          uv publish $WHEEL_PATH

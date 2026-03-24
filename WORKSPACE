@@ -455,3 +455,14 @@ http_archive(
     strip_prefix = "nanobind_json-e1953530697f61cbca9dc9b4f51561ea785cb09d",
     urls = ["https://github.com/ianhbell/nanobind_json/archive/e1953530697f61cbca9dc9b4f51561ea785cb09d.zip"],
 )
+
+load("@rules_python//python:pip.bzl", "pip_parse")
+
+pip_parse(
+    name = "custom_pip_deps",
+    requirements_lock = "//:requirements.txt",
+)
+
+load("@custom_pip_deps//:requirements.bzl", install_custom_deps = "install_deps")
+
+install_custom_deps()

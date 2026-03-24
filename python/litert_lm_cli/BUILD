@@ -1,0 +1,96 @@
+# Copyright 2026 The ODML Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("@org_tensorflow//tensorflow:pytype.default.bzl", "pytype_strict_binary", "pytype_strict_library")
+
+load("@custom_pip_deps//:requirements.bzl", "requirement")
+load("@rules_python//python:packaging.bzl", "py_package", "py_wheel")
+load("//:version.bzl", "VERSION")
+
+pytype_strict_library(
+    name = "model",
+    srcs = ["model.py"],
+    deps = [
+        "//python/litert_lm",
+    ],
+    imports = [".."],
+)
+
+pytype_strict_binary(
+    name = "litert-lm",
+    srcs = ["main.py"],
+    main = "main.py",
+    tags = [
+        "noios",
+        "nomacos",
+        "nowindows",
+    ],
+    deps = [
+        ":model",
+        "//python/litert_lm",
+        requirement("fire"),
+    ],
+    imports = [".."],
+)
+
+config_setting(
+    name = "is_nightly",
+    define_values = {"PYPI_NIGHTLY": "1"},
+)
+
+py_package(
+    name = "litert_lm_cli_pkg",
+    packages = ["python.litert_lm_cli"],
+    deps = [":litert-lm"],
+)
+
+py_wheel(
+    name = "litert_lm_cli_wheel",
+    abi = "none",
+    distribution = select({
+        ":is_nightly": "litert-lm-cli-nightly",
+        "//conditions:default": "litert-lm-cli",
+    }),
+    platform = "any",
+    python_tag = "py3",
+    summary = "LiteRT-LM command line tool",
+    license = "Apache-2.0",
+    homepage = "https://github.com/google-ai-edge/LiteRT-LM",
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
+    ],
+    strip_path_prefixes = ["python"],
+    version = select({
+        ":is_nightly": VERSION + ".dev$(PYPI_NIGHTLY_DATE)",
+        "//conditions:default": VERSION,
+    }),
+    entry_points = {
+        "console_scripts": [
+            "litert-lm = litert_lm_cli.main:main",
+        ],
+    },
+    requires = select({
+        ":is_nightly": ["litert-lm-nightly"],
+        "//conditions:default": ["litert-lm"],
+    }) + [
+        "fire",
+    ],
+    deps = [":litert_lm_cli_pkg"],
+)

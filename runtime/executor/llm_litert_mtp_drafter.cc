@@ -246,11 +246,17 @@ absl::StatusOr<std::vector<std::vector<int>>> LlmLiteRtMtpDrafter::Draft(
   RETURN_IF_ERROR(FillAttentionMask(mtp_drafter_input_buffers["mask"],
                                     /*start_step=*/position,
                                     /*steps=*/1));
+  if (mtp_drafter_input_buffers.contains("param_tensor")) {
+    RETURN_IF_ERROR(FillSingleBufferCacheParamTensor(
+        mtp_drafter_input_buffers["param_tensor"], position,
+        /*update_length=*/1));
+  }
 
   absl::flat_hash_map<absl::string_view, TensorBuffer>
       mtp_drafter_output_buffers;
   for (const auto& [output_name, output_buffer] : drafter_output_buffers_) {
     LITERT_ASSIGN_OR_RETURN(auto output_buffer_dup, output_buffer.Duplicate());
+    LITERT_RETURN_IF_ERROR(output_buffer_dup.ClearEvent());
     mtp_drafter_output_buffers[output_name] = std::move(output_buffer_dup);
   }
 
@@ -337,14 +343,21 @@ absl::StatusOr<std::vector<std::vector<int>>> LlmLiteRtMtpDrafter::Draft(
     LITERT_ASSIGN_OR_RETURN(auto input_buffer_dup, input_buffer.Duplicate());
     verifier_input_buffers[input_name] = std::move(input_buffer_dup);
   }
+  if (verifier_input_buffers.contains("param_tensor")) {
+    RETURN_IF_ERROR(
+        FillSingleBufferCacheParamTensor(verifier_input_buffers["param_tensor"],
+                                         position, num_draft_steps_ + 1));
+  }
 
   absl::flat_hash_map<absl::string_view, TensorBuffer> verifier_output_buffers;
   for (const auto& [output_name, output_buffer] : verifier_output_buffers_) {
     LITERT_ASSIGN_OR_RETURN(auto output_buffer_dup, output_buffer.Duplicate());
+    LITERT_RETURN_IF_ERROR(output_buffer_dup.ClearEvent());
     verifier_output_buffers[output_name] = std::move(output_buffer_dup);
   }
   for (auto& [output_name, output_buffer] : output_kv_cache_buffers) {
     LITERT_ASSIGN_OR_RETURN(auto output_buffer_dup, output_buffer.Duplicate());
+    LITERT_RETURN_IF_ERROR(output_buffer_dup.ClearEvent());
     verifier_output_buffers[output_name] = std::move(output_buffer_dup);
   }
 

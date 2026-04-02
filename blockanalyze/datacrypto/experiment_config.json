@@ -1,0 +1,19 @@
+{
+  "experimentId": "exp-001",
+  "createdAt": "2025-09-11T12:00:00Z",
+  "description": "Volatility analysis experiment for a given token",
+  "parameters": {
+    "tokenSymbol": "SOL",
+    "analysisWindowMinutes": 60,
+    "volatilityThreshold": 5.0,
+    "liquidityThresholdUsd": 100000,
+    "minDataPoints": 50
+  },
+  "status": "draft",
+  "results": {
+    "averageVolatility": null,
+    "maxDrawdown": null,
+    "trendDirection": null
+  },
+  "notes": "Initialize with baseline parameters before running."
+}

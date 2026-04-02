@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="360" height="360" alt="auralys-logo" src="https://github.com/Auralys-Analytics/Auralys/blob/main/auralytics_1-removebg-preview.png" />
+  <img width="360" height="360" alt="auralys-logo" src="https://github.com/Auralys-Analytics/Auralys-Agents/blob/main/auralytics_1-removebg-preview.png" />
 </p>
 
 <h1 align="center">Auralys</h1>

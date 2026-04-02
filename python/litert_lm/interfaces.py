@@ -348,3 +348,7 @@ class AbstractSession(abc.ABC):
         Responses: The log likelihood scores of the target text given the
         existing session state.
     """
+
+  @abc.abstractmethod
+  def cancel_process(self) -> None:
+    """Cancels the ongoing inference process."""

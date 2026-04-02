@@ -722,7 +722,9 @@ NB_MODULE(litert_lm_ext, module) {
                 self.RunTextScoring(target_text_views, store_token_lengths)));
           },
           nb::arg("target_text"), nb::arg("store_token_lengths") = false,
-          "Scores the target text after the prefill process is done.");
+          "Scores the target text after the prefill process is done.")
+      .def("cancel_process", &Engine::Session::CancelProcess,
+           "Cancels the ongoing inference process.");
 
   nb::class_<Conversation>(module, "Conversation", nb::dynamic_attr())
       // Support for Python context managers (with statement).

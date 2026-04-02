@@ -253,8 +253,27 @@ class EngineTest(LiteRtLmTestBase):
       stream = session.run_decode_async()
       responses = list(stream)
       self.assertNotEmpty(responses)
+      self.assertLen(responses, 6)
       full_text = "".join(["".join(r.texts) for r in responses])
       self.assertEqual(full_text, self._EXPECTED_RESPONSE)
+
+  def test_session_api_cancel_process(self):
+    with (
+        self._create_engine() as engine,
+        engine.create_session() as session,
+    ):
+      self.assertIsInstance(session, litert_lm.AbstractSession)
+      session.run_prefill(["Hello world!"])
+      stream = session.run_decode_async()
+
+      responses = []
+      for response in stream:
+        responses.append(response)
+        session.cancel_process()
+
+      self.assertNotEmpty(responses)
+      # We expect fewer responses than a full decode (which is 6 chunks).
+      self.assertLess(len(responses), 6)
 
 
 class FunctionCallingTest(LiteRtLmTestBase):
